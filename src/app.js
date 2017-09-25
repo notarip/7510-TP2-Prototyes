@@ -146,14 +146,48 @@ function transformRules(arr)
   return rules;
 }
 
+function evaluateFact(query, facts)
+{
+  fact = [];
+  fact = facts.filter(function(elem){
+    return elem == query;
+  });
+
+  return (fact.length > 0);
+}
+
+function evaluateRule(query, rules, facts)
+{
+  var re = /(\w+)\([a-z,]+\)/;
+  var ruleName = re.exec(query)[1];
+  rule = rules.filter(function(elem){
+    return elem.name == ruleName;
+  });
+  if(rule.length == 1){
+      rule = rule[0];
+      params = extracQueryParams(query);
+      toEvaluateFacts = rule.facts;
+      params.forEach(function(item,index){
+       toEvaluateFacts = toEvaluateFacts.map(function(elem){
+         return elem.replace(index,item);
+       });
+
+  }else{
+    return false;
+  }
+
+
+
+}
+
 function evaluateQuery(db, query){
 
   if(validateQuery(query)){
+    query = cleanQuery(query);
     db = parseDB(db);
     facts = extractFacts(db);
     rules = transformRules(extractRules(db));
-    console.log(facts);
-    console.log(rules);
+    return evaluateFact(query, facts) || evaluateRule(query, rules, facts);
   }else{
     return null;
   }
@@ -170,4 +204,4 @@ function evaluateQuery(db, query){
 * -
 * */
 
-console.log(evaluateQuery(loadDB(true),'padres(asa,asas)'));
+console.log(evaluateQuery(loadDB(true),'padres(juan,ana,pepe)'));
